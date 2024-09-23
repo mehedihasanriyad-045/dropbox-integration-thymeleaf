@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Dropbox Auth Demo - Dashboard</title>
+</head>
+<body>
+<h1>Dashboard</h1>
+<div th:if="${error}">
+    <p th:text="${error}" style="color: red;"></p>
+</div>
+<div th:unless="${error}">
+    <p>You have successfully authenticated with Dropbox!</p>
+    <p>Your access token is: <span th:text="${accessToken}"></span></p>
+    <p>Your refresh token is: <span th:text="${refreshToken}"></span></p>
+    <p>Your token expires at: <span th:text="${expiresAt}"></span></p>
+</div>
+</body>
+</html>
