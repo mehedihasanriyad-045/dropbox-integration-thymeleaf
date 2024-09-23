@@ -1,11 +1,16 @@
 package com.iis.dropboxthymelife.service;
 
 import com.dropbox.core.*;
+import com.dropbox.core.v2.DbxClientV2;
+import com.dropbox.core.v2.files.ListFolderResult;
+import com.dropbox.core.v2.files.Metadata;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 @Service
 public class DropboxService {
@@ -59,34 +64,42 @@ public class DropboxService {
 
 
         try {
-            return webAuth.finishFromCode(authorizationCode, redirectUri);
+            DbxAuthFinish authFinish = webAuth.finishFromCode(authorizationCode, redirectUri);
+
+            session.setAttribute("accessToken", authFinish.getAccessToken());
+            session.setAttribute("refreshToken", authFinish.getRefreshToken());
+            session.setAttribute("expiresAt", authFinish.getExpiresAt());
+
+            return authFinish;
+
         } catch (DbxException e) {
             e.printStackTrace();
             return null;
         }
     }
 
-//    private DbxClientV2 getClient() {
-//        DbxRequestConfig config = DbxRequestConfig.newBuilder("dropbox/springboot-app").build();
-//        return new DbxClientV2(config, ACCESS_TOKEN);
-//    }
-//
-//    public List<Metadata> getAllFilesAndFolders() throws Exception {
-//        DbxClientV2 client = getClient();
-//        ListFolderResult result = client.files().listFolder("");
-//        List<Metadata> filesAndFolders = new ArrayList<>();
-//
-//        while (true) {
-//            for (Metadata metadata : result.getEntries()) {
-//                filesAndFolders.add(metadata);
-//            }
-//
-//            if (!result.getHasMore()) {
-//                break;
-//            }
-//
-//            result = client.files().listFolderContinue(result.getCursor());
-//        }
-//        return filesAndFolders;
-//    }
+    public DbxClientV2 getClient(String accessToken) {
+        DbxRequestConfig config = DbxRequestConfig.newBuilder("dropbox/springboot-app").build();
+        return new DbxClientV2(config, accessToken);
+    }
+
+    public List<Metadata> getAllFilesAndFolders(String accessToken, String refreshToken) throws Exception {
+        DbxClientV2 client = getClient(accessToken);
+        ListFolderResult result = client.files().listFolder("");
+        List<Metadata> filesAndFolders = new ArrayList<>();
+
+        while (true) {
+            filesAndFolders.addAll(result.getEntries());
+
+            if (!result.getHasMore()) {
+                break;
+            }
+
+            result = client.files().listFolderContinue(result.getCursor());
+        }
+        return filesAndFolders;
+    }
+
+
+
 }

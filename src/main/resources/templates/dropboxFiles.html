@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Dropbox Files</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            padding: 10px;
+            border: 1px solid #ddd;
+            margin-bottom: 5px;
+        }
+        .file {
+            color: #2196F3;
+        }
+        .folder {
+            color: #4CAF50;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+<h1>Dropbox Files and Folders</h1>
+
+<div th:if="${error}">
+    <p class="error" th:text="${error}"></p>
+</div>
+
+<div th:unless="${error}">
+    <ul>
+        <li th:each="item : ${filesAndFolders}">
+            <span th:text="${item.path}"></span>
+
+            <!-- Display the type (File/Folder) -->
+            <span th:if="${item.type == 'file'}" class="file">(File)</span>
+            <span th:if="${item.type == 'folder'}" class="folder">(Folder)</span>
+        </li>
+    </ul>
+</div>
+</body>
+</html>

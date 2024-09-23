@@ -32,6 +32,11 @@ public class DropboxAuthController {
     public String callback(@RequestParam("code") String code, HttpSession session, Model model) {
         DbxAuthFinish credential = dropboxService.getCredential(code, session);
         if (credential != null) {
+
+            session.setAttribute("accessToken", credential.getAccessToken());
+            session.setAttribute("refreshToken", credential.getRefreshToken());
+            session.setAttribute("expiresAt", credential.getExpiresAt());
+
             model.addAttribute("accessToken", credential.getAccessToken());
             model.addAttribute("refreshToken", credential.getRefreshToken());
             model.addAttribute("expiresAt", credential.getExpiresAt());

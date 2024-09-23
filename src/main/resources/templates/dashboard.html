@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <title>Dropbox Auth Demo - Dashboard</title>
 </head>
@@ -13,6 +13,11 @@
     <p>Your access token is: <span th:text="${accessToken}"></span></p>
     <p>Your refresh token is: <span th:text="${refreshToken}"></span></p>
     <p>Your token expires at: <span th:text="${expiresAt}"></span></p>
+
+    <!-- Add a button to view Dropbox files -->
+    <form action="/files" method="get">
+        <button type="submit">View Dropbox Files</button>
+    </form>
 </div>
 </body>
 </html>
