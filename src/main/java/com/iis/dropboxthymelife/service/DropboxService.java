@@ -100,6 +100,22 @@ public class DropboxService {
         return filesAndFolders;
     }
 
+    public List<Metadata> getFilesAndFoldersAtPath(String accessToken, String refreshToken, String path) throws Exception {
+        DbxClientV2 client = getClient(accessToken);
+        ListFolderResult result = client.files().listFolder(path); // Use the path to list files/folders in a specific folder
+        List<Metadata> filesAndFolders = new ArrayList<>();
+
+        while (true) {
+            filesAndFolders.addAll(result.getEntries());
+
+            if (!result.getHasMore()) {
+                break;
+            }
+
+            result = client.files().listFolderContinue(result.getCursor());
+        }
+        return filesAndFolders;
+    }
 
 
 }
