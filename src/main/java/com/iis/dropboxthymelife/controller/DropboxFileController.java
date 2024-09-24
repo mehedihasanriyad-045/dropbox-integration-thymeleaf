@@ -50,5 +50,28 @@ public class DropboxFileController {
         }
         return "dropboxFiles";
     }
+
+    @GetMapping("/read-file")
+    public String readFileContent(
+            @RequestParam("filePath") String filePath,
+            HttpSession session,
+            Model model) {
+        try {
+
+            String accessToken = (String) session.getAttribute("accessToken");
+            String refreshToken = (String) session.getAttribute("refreshToken");
+
+            // Fetch file content
+            String fileContent = dropboxService.readFileContent(accessToken, refreshToken, filePath);
+
+            // Add the content to the model to be displayed
+            model.addAttribute("fileContent", fileContent);
+            model.addAttribute("filePath", filePath);
+
+        } catch (Exception e) {
+            model.addAttribute("error", "Unable to read file content");
+        }
+        return "fileContent"; // New Thymeleaf template to display file content
+    }
 }
 

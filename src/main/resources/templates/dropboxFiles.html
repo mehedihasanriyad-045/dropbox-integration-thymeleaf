@@ -53,20 +53,19 @@
 
 <div th:unless="${error}">
 
-    <!-- Back button to navigate to parent folder -->
     <div th:if="${currentPath != ''}">
         <a th:href="@{/files(path=${parentPath})}" class="back-button">Back</a>
     </div>
 
     <ul>
         <li th:each="item : ${filesAndFolders}">
-            <!-- Display the file or folder path -->
             <span th:text="${item.path}"></span>
 
             <!-- If it's a folder, make it a clickable link -->
             <a th:if="${item.type == 'folder'}" th:href="@{/files(path=${item.path})}" class="folder">(Folder)</a>
-            <!-- If it's a file, just display as text -->
-            <span th:if="${item.type == 'file'}" class="file">(File)</span>
+
+            <!-- If it's a file, add a clickable link to read the file -->
+            <a th:if="${item.type == 'file'}" th:href="@{/read-file(filePath=${item.path})}" class="file">(File)</a>
         </li>
     </ul>
 </div>

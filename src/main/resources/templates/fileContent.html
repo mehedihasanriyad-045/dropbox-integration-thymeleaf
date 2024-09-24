@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>File Content</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .file-content {
+            white-space: pre-wrap;
+            background-color: #f4f4f4;
+            padding: 10px;
+            border: 1px solid #ddd;
+            font-family: monospace;
+        }
+        .back-button {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f1f1f1;
+            color: #333;
+            text-decoration: none;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .back-button:hover {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+
+<h1>File Content: <span th:text="${filePath}"></span></h1>
+
+<!-- Back button to navigate back to the folder -->
+<a th:href="@{/files(path=${#strings.substring(filePath, 0, filePath.lastIndexOf('/'))})}" class="back-button">Back to Folder</a>
+
+
+&lt;!&ndash; Display the file content &ndash;&gt;
+<pre class="file-content" th:text="${fileContent}"></pre>
+
+
+</body>
+</html>
