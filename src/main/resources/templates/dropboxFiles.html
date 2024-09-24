@@ -10,48 +10,79 @@
             font-family: Arial, sans-serif;
             margin: 20px;
         }
+
         .file-manager-container {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
         }
+
+        /* Grid layout for file/folder items */
+        .file-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
         .file-list-item {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            padding: 10px;
+            justify-content: center;
+            padding: 15px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            margin-bottom: 10px;
             transition: background-color 0.3s;
+            cursor: pointer;
+            text-align: center;
         }
+
         .file-list-item:hover {
             background-color: #f8f9fa;
         }
+
         .file-list-item i {
-            font-size: 24px;
-            margin-right: 10px;
+            margin-bottom: 10px;
         }
-        .file-icon {
-            color: #2196F3;
+
+        .file-list-item span {
+            word-break: break-word;
+            font-size: 14px;
         }
+
         .folder-icon {
             color: #4CAF50;
         }
-        .back-button {
+
+        .file-icon {
+            color: #2196F3;
+        }
+
+        /* Button container for changing icon size */
+        .icon-size-buttons {
             margin-bottom: 20px;
-            display: inline-block;
-            padding: 10px 15px;
-            background-color: #f1f1f1;
-            color: #333;
-            text-decoration: none;
-            border: 1px solid #ddd;
-            border-radius: 4px;
         }
-        .back-button:hover {
-            background-color: #ddd;
+
+        .icon-size-buttons .btn {
+            margin-right: 10px;
         }
-        .error {
-            color: red;
+
+        /* Sizes for icons */
+        .icon-size-small .file-list-item i {
+            font-size: 24px;
         }
+
+        .icon-size-medium .file-list-item i {
+            font-size: 32px;
+        }
+
+        .icon-size-large .file-list-item i {
+            font-size: 48px;
+        }
+
+        .icon-size-xlarge .file-list-item i {
+            font-size: 64px;
+        }
+
     </style>
 </head>
 <body>
@@ -70,13 +101,21 @@
         </a>
     </div>
 
+    <!-- Buttons for icon size selection -->
+    <div class="icon-size-buttons">
+        <button class="btn btn-outline-secondary btn-sm" onclick="changeIconSize('small')">Small Icons</button>
+        <button class="btn btn-outline-secondary btn-sm" onclick="changeIconSize('medium')">Medium Icons</button>
+        <button class="btn btn-outline-secondary btn-sm" onclick="changeIconSize('large')">Large Icons</button>
+        <button class="btn btn-outline-secondary btn-sm" onclick="changeIconSize('xlarge')">Extra Large Icons</button>
+    </div>
+
     <!-- File/Folder Listing -->
-    <div class="list-group">
+    <div class="file-list icon-size-medium" id="fileList">
         <div th:each="item : ${filesAndFolders}" class="file-list-item">
             <!-- Folder Icon and Link -->
             <div th:if="${item.type == 'folder'}" class="folder-item">
                 <i class="fas fa-folder folder-icon"></i>
-                <a th:href="@{/files(path=${item.path})}" class="ml-2">
+                <a th:href="@{/files(path=${item.path})}">
                     <span th:text="${item.path}"></span>
                 </a>
             </div>
@@ -84,7 +123,7 @@
             <!-- File Icon and Download Link -->
             <div th:if="${item.type == 'file'}" class="file-item">
                 <i class="fas fa-file file-icon"></i>
-                <a th:href="@{/download-file(filePath=${item.path})}" class="ml-2">
+                <a th:href="@{/download-file(filePath=${item.path})}">
                     <span th:text="${item.path}"></span>
                 </a>
             </div>
@@ -95,5 +134,14 @@
 <!-- Bootstrap JS and dependencies -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- JavaScript for changing icon size -->
+<script>
+    function changeIconSize(size) {
+        var fileList = document.getElementById('fileList');
+        fileList.className = 'file-list icon-size-' + size;
+    }
+</script>
+
 </body>
 </html>
