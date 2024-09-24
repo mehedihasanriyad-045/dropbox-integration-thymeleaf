@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
+        /* Your existing styles */
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
@@ -55,41 +56,7 @@
             color: #2196F3;
         }
 
-        /* File-specific icons */
-        .pdf-icon {
-            color: red;
-        }
-
-        .image-icon {
-            color: #FF5722;
-        }
-
-        .video-icon {
-            color: #673AB7;
-        }
-
-        .audio-icon {
-            color: #9C27B0;
-        }
-
-        .word-icon {
-            color: #0D47A1;
-        }
-
-        .excel-icon {
-            color: #2E7D32;
-        }
-
-        /* Button container for changing icon size */
-        .icon-size-buttons {
-            margin-bottom: 20px;
-        }
-
-        .icon-size-buttons .btn {
-            margin-right: 10px;
-        }
-
-        /* Sizes for icons */
+        /* Icon size classes */
         .icon-size-small .file-list-item i {
             font-size: 24px;
         }
@@ -106,6 +73,14 @@
             font-size: 64px;
         }
 
+        /* Button container for changing icon size */
+        .icon-size-buttons {
+            margin-bottom: 20px;
+        }
+
+        .icon-size-buttons .btn {
+            margin-right: 10px;
+        }
     </style>
 </head>
 <body>
@@ -119,7 +94,7 @@
 
     <!-- Back Button (if not in root directory) -->
     <div th:if="${currentPath != ''}">
-        <a th:href="@{/files(path=${parentPath})}" class="back-button">
+        <a th:href="@{/files(path=${parentPath}, size=${iconSize})}" class="back-button">
             <i class="fas fa-arrow-left"></i> Back
         </a>
     </div>
@@ -133,22 +108,21 @@
     </div>
 
     <!-- File/Folder Listing -->
-    <div class="file-list icon-size-medium" id="fileList">
+    <div class="file-list" th:classappend="'icon-size-' + ${iconSize}" id="fileList">
         <div th:each="item : ${filesAndFolders}" class="file-list-item">
             <!-- Folder Icon and Link -->
             <div th:if="${item.type == 'folder'}" class="folder-item">
                 <i class="fas fa-folder folder-icon"></i>
-                <a th:href="@{/files(path=${item.path})}">
-                    <span th:text="${#strings.substring(item.path, item.path.lastIndexOf('/') + 1)}"></span> <!-- Show only the folder name -->
+                <a th:href="@{/files(path=${item.path}, size=${iconSize})}">
+                    <span th:text="${#strings.substring(item.path, item.path.lastIndexOf('/') + 1)}"></span>
                 </a>
             </div>
 
             <!-- File Icon and Download Link -->
             <div th:if="${item.type == 'file'}" class="file-item">
-                <!-- Dynamically set file icon based on file extension ${@fileController.getIconClass(item.path)} -->
                 <i th:classappend="${@fileController.getFileIcon(item.path)}"></i> <!-- Dynamic file-specific icon -->
                 <a th:href="@{/download-file(filePath=${item.path})}">
-                    <span th:text="${#strings.substring(item.path, item.path.lastIndexOf('/') + 1)}"></span> <!-- Show only the file name -->
+                    <span th:text="${#strings.substring(item.path, item.path.lastIndexOf('/') + 1)}"></span>
                 </a>
             </div>
         </div>
@@ -164,6 +138,14 @@
     function changeIconSize(size) {
         var fileList = document.getElementById('fileList');
         fileList.className = 'file-list icon-size-' + size;
+
+        // Update all links to include the size in the URL
+        let links = document.querySelectorAll('a');
+        links.forEach(link => {
+            let url = new URL(link.href);
+            url.searchParams.set('size', size);
+            link.href = url.href;
+        });
     }
 </script>
 

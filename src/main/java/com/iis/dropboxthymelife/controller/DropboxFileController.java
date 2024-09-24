@@ -28,6 +28,7 @@ public class DropboxFileController {
     @GetMapping("/files")
     public String getFilesAndFolders(
             @RequestParam(name = "path", required = false, defaultValue = "") String path,
+            @RequestParam(defaultValue = "medium") String size,
             HttpSession session,
             Model model) {
         try {
@@ -47,9 +48,11 @@ public class DropboxFileController {
             model.addAttribute("filesAndFolders", fileFolderItems);
             model.addAttribute("currentPath", path);
 
+
             // Determine the parent folder path for the back button
             String parentPath = !path.isEmpty() && path.contains("/") ? path.substring(0, path.lastIndexOf('/')) : "";
             model.addAttribute("parentPath", parentPath);
+            model.addAttribute("iconSize", size);
 
         } catch (Exception e) {
             model.addAttribute("error", "Unable to fetch files from Dropbox");
