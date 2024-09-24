@@ -16,7 +16,6 @@
             margin: 0 auto;
         }
 
-        /* Grid layout for file/folder items */
         .file-list {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -27,7 +26,6 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             padding: 15px;
             border: 1px solid #ddd;
             border-radius: 4px;
@@ -116,7 +114,7 @@
             <div th:if="${item.type == 'folder'}" class="folder-item">
                 <i class="fas fa-folder folder-icon"></i>
                 <a th:href="@{/files(path=${item.path})}">
-                    <span th:text="${item.path}"></span>
+                    <span th:text="${#strings.substring(item.path, item.path.lastIndexOf('/') + 1)}"></span> <!-- Show only the folder name -->
                 </a>
             </div>
 
@@ -124,7 +122,7 @@
             <div th:if="${item.type == 'file'}" class="file-item">
                 <i class="fas fa-file file-icon"></i>
                 <a th:href="@{/download-file(filePath=${item.path})}">
-                    <span th:text="${item.path}"></span>
+                    <span th:text="${#strings.substring(item.path, item.path.lastIndexOf('/') + 1)}"></span> <!-- Show only the file name -->
                 </a>
             </div>
         </div>
