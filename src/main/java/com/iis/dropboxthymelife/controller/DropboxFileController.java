@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@Controller
+@Controller("fileController")
 public class DropboxFileController {
 
     @Autowired
@@ -120,6 +120,24 @@ public class DropboxFileController {
 
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    public String getFileIcon(String filePath) {
+        if (filePath.endsWith(".pdf")) {
+            return "fas fa-file-pdf pdf-icon";
+        } else if (filePath.endsWith(".jpg") || filePath.endsWith(".jpeg") || filePath.endsWith(".png") || filePath.endsWith(".gif")) {
+            return "fas fa-file-image image-icon";
+        } else if (filePath.endsWith(".mp4") || filePath.endsWith(".mkv") || filePath.endsWith(".avi")) {
+            return "fas fa-file-video video-icon";
+        } else if (filePath.endsWith(".mp3") || filePath.endsWith(".wav")) {
+            return "fas fa-file-audio audio-icon";
+        } else if (filePath.endsWith(".doc") || filePath.endsWith(".docx")) {
+            return "fas fa-file-word word-icon";
+        } else if (filePath.endsWith(".xls") || filePath.endsWith(".xlsx")) {
+            return "fas fa-file-excel excel-icon";
+        } else {
+            return "fas fa-file-alt file-icon"; // Default icon for other file types
         }
     }
 

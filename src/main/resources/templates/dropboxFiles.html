@@ -55,6 +55,31 @@
             color: #2196F3;
         }
 
+        /* File-specific icons */
+        .pdf-icon {
+            color: red;
+        }
+
+        .image-icon {
+            color: #FF5722;
+        }
+
+        .video-icon {
+            color: #673AB7;
+        }
+
+        .audio-icon {
+            color: #9C27B0;
+        }
+
+        .word-icon {
+            color: #0D47A1;
+        }
+
+        .excel-icon {
+            color: #2E7D32;
+        }
+
         /* Button container for changing icon size */
         .icon-size-buttons {
             margin-bottom: 20px;
@@ -120,7 +145,8 @@
 
             <!-- File Icon and Download Link -->
             <div th:if="${item.type == 'file'}" class="file-item">
-                <i class="fas fa-file file-icon"></i>
+                <!-- Dynamically set file icon based on file extension ${@fileController.getIconClass(item.path)} -->
+                <i th:classappend="${@fileController.getFileIcon(item.path)}"></i> <!-- Dynamic file-specific icon -->
                 <a th:href="@{/download-file(filePath=${item.path})}">
                     <span th:text="${#strings.substring(item.path, item.path.lastIndexOf('/') + 1)}"></span> <!-- Show only the file name -->
                 </a>
