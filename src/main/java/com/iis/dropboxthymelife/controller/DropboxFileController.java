@@ -6,9 +6,15 @@ import com.iis.dropboxthymelife.helper.FileFolderItem;
 import com.iis.dropboxthymelife.service.DropboxService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -57,21 +63,65 @@ public class DropboxFileController {
             HttpSession session,
             Model model) {
         try {
-
             String accessToken = (String) session.getAttribute("accessToken");
             String refreshToken = (String) session.getAttribute("refreshToken");
 
-            // Fetch file content
-            String fileContent = dropboxService.readFileContent(accessToken, refreshToken, filePath);
+            // Extract file extension to determine the type
+            String fileType = getFileType(filePath);
 
-            // Add the content to the model to be displayed
-            model.addAttribute("fileContent", fileContent);
+            // If it's a text file, fetch its content
+            String fileContent = "";
+            if (fileType.equals("text")) {
+                fileContent = dropboxService.readFileContent(accessToken, refreshToken, filePath);
+            }
+
+            // Add attributes to model
             model.addAttribute("filePath", filePath);
+            model.addAttribute("fileContent", fileContent);
+            model.addAttribute("fileType", fileType);
 
         } catch (Exception e) {
             model.addAttribute("error", "Unable to read file content");
         }
-        return "fileContent"; // New Thymeleaf template to display file content
+        return "fileContent";
     }
+
+    private String getFileType(String filePath) {
+        if (filePath.endsWith(".txt") || filePath.endsWith(".md")) {
+            return "text";
+        } else if (filePath.endsWith(".jpg") || filePath.endsWith(".jpeg") || filePath.endsWith(".png") || filePath.endsWith(".gif")) {
+            return "image";
+        } else if (filePath.endsWith(".mp4") || filePath.endsWith(".avi") || filePath.endsWith(".mov")) {
+            return "video";
+        } else if (filePath.endsWith(".pdf")) {
+            return "pdf";
+        } else {
+            return "unsupported";
+        }
+    }
+
+    @GetMapping("/download-file")
+    public ResponseEntity<InputStreamResource> downloadFile(@RequestParam("filePath") String filePath, HttpSession session) {
+        try {
+            String accessToken = (String) session.getAttribute("accessToken");
+            String refreshToken = (String) session.getAttribute("refreshToken");
+
+            // Get file stream from Dropbox service
+            InputStream fileStream = dropboxService.downloadFile(accessToken, refreshToken, filePath);
+
+            // Set headers and prepare the response
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filePath.substring(filePath.lastIndexOf("/") + 1));
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(new InputStreamResource(fileStream));
+
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
 }
 

@@ -3,6 +3,7 @@ package com.iis.dropboxthymelife.service;
 import com.dropbox.core.*;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.DownloadErrorException;
+import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
 import jakarta.servlet.http.HttpSession;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -139,6 +141,15 @@ public class DropboxService {
         }
     }
 
+    public InputStream downloadFile(String accessToken, String refreshToken, String filePath) throws Exception {
+        DbxClientV2 client = getClient(accessToken);
 
+        try {
+            FileMetadata metadata = client.files().download(filePath).getResult();
+            return client.files().download(filePath).getInputStream();
+        } catch (DownloadErrorException e) {
+            throw new Exception("Error downloading file: " + e.getMessage(), e);
+        }
+    }
 
 }

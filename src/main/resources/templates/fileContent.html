@@ -30,6 +30,13 @@
         .back-button:hover {
             background-color: #ddd;
         }
+        .image, .video, .pdf {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
     </style>
 </head>
 <body>
@@ -39,10 +46,33 @@
 <!-- Back button to navigate back to the folder -->
 <a th:href="@{/files(path=${#strings.substring(filePath, 0, filePath.lastIndexOf('/'))})}" class="back-button">Back to Folder</a>
 
+<!-- Conditionally display the file content based on file type -->
+<div th:if="${fileType == 'text'}">
+    <pre class="file-content" th:text="${fileContent}"></pre>
+</div>
 
-&lt;!&ndash; Display the file content &ndash;&gt;
-<pre class="file-content" th:text="${fileContent}"></pre>
+<!-- For images -->
+<div th:if="${fileType == 'image'}">
+    <img th:src="@{/read-file-content(filePath=${filePath})}" alt="Image file" class="image">
+</div>
 
+<!-- For videos -->
+<div th:if="${fileType == 'video'}">
+    <video controls class="video">
+        <source th:src="@{/read-file-content(filePath=${filePath})}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+</div>
+
+<!-- For PDFs -->
+<div th:if="${fileType == 'pdf'}">
+    <iframe th:src="@{/read-file-content(filePath=${filePath})}" width="100%" height="600px"></iframe>
+</div>
+
+<!-- If file type is unsupported, display a message -->
+<div th:if="${fileType == 'unsupported'}">
+    <p>Sorry, this file type is not supported for preview.</p>
+</div>
 
 </body>
 </html>

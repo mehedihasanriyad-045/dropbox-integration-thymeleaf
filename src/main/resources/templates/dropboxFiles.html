@@ -2,32 +2,39 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <title>Dropbox Files</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
         }
-        h1 {
-            color: #333;
+        .file-manager-container {
+            max-width: 800px;
+            margin: 0 auto;
         }
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        li {
+        .file-list-item {
+            display: flex;
+            align-items: center;
             padding: 10px;
             border: 1px solid #ddd;
-            margin-bottom: 5px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            transition: background-color 0.3s;
         }
-        .file {
+        .file-list-item:hover {
+            background-color: #f8f9fa;
+        }
+        .file-list-item i {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+        .file-icon {
             color: #2196F3;
         }
-        .folder {
+        .folder-icon {
             color: #4CAF50;
-            cursor: pointer;
-        }
-        .error {
-            color: red;
         }
         .back-button {
             margin-bottom: 20px;
@@ -42,32 +49,51 @@
         .back-button:hover {
             background-color: #ddd;
         }
+        .error {
+            color: red;
+        }
     </style>
 </head>
 <body>
-<h1>Dropbox Files and Folders</h1>
+<div class="file-manager-container">
+    <h1>Dropbox Files and Folders</h1>
 
-<div th:if="${error}">
-    <p class="error" th:text="${error}"></p>
-</div>
-
-<div th:unless="${error}">
-
-    <div th:if="${currentPath != ''}">
-        <a th:href="@{/files(path=${parentPath})}" class="back-button">Back</a>
+    <!-- Error Display -->
+    <div th:if="${error}">
+        <p class="error" th:text="${error}"></p>
     </div>
 
-    <ul>
-        <li th:each="item : ${filesAndFolders}">
-            <span th:text="${item.path}"></span>
+    <!-- Back Button (if not in root directory) -->
+    <div th:if="${currentPath != ''}">
+        <a th:href="@{/files(path=${parentPath})}" class="back-button">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+    </div>
 
-            <!-- If it's a folder, make it a clickable link -->
-            <a th:if="${item.type == 'folder'}" th:href="@{/files(path=${item.path})}" class="folder">(Folder)</a>
+    <!-- File/Folder Listing -->
+    <div class="list-group">
+        <div th:each="item : ${filesAndFolders}" class="file-list-item">
+            <!-- Folder Icon and Link -->
+            <div th:if="${item.type == 'folder'}" class="folder-item">
+                <i class="fas fa-folder folder-icon"></i>
+                <a th:href="@{/files(path=${item.path})}" class="ml-2">
+                    <span th:text="${item.path}"></span>
+                </a>
+            </div>
 
-            <!-- If it's a file, add a clickable link to read the file -->
-            <a th:if="${item.type == 'file'}" th:href="@{/read-file(filePath=${item.path})}" class="file">(File)</a>
-        </li>
-    </ul>
+            <!-- File Icon and Download Link -->
+            <div th:if="${item.type == 'file'}" class="file-item">
+                <i class="fas fa-file file-icon"></i>
+                <a th:href="@{/download-file(filePath=${item.path})}" class="ml-2">
+                    <span th:text="${item.path}"></span>
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
