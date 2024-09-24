@@ -85,17 +85,14 @@
 </head>
 <body>
 <div class="file-manager-container">
-    <h1>Dropbox Files and Folders</h1>
 
-    <!-- Error Display -->
     <div th:if="${error}">
         <p class="error" th:text="${error}"></p>
     </div>
 
-    <!-- Back Button (if not in root directory) -->
     <div th:if="${currentPath != ''}">
         <a th:href="@{/files(path=${parentPath}, size=${iconSize})}" class="back-button">
-            <i class="fas fa-arrow-left"></i> Back
+            <i class="fas fa-arrow-left"></i> Back <br>
         </a>
     </div>
 
@@ -112,7 +109,7 @@
         <div th:each="item : ${filesAndFolders}" class="file-list-item">
             <!-- Folder Icon and Link -->
             <div th:if="${item.type == 'folder'}" class="folder-item">
-                <i class="fas fa-folder folder-icon"></i>
+                <i class="fas fa-folder folder-icon"></i><br>
                 <a th:href="@{/files(path=${item.path}, size=${iconSize})}">
                     <span th:text="${#strings.substring(item.path, item.path.lastIndexOf('/') + 1)}"></span>
                 </a>
@@ -120,7 +117,7 @@
 
             <!-- File Icon and Download Link -->
             <div th:if="${item.type == 'file'}" class="file-item">
-                <i th:classappend="${@fileController.getFileIcon(item.path)}"></i> <!-- Dynamic file-specific icon -->
+                <i th:classappend="${@fileController.getFileIcon(item.path)}"></i> <br>
                 <a th:href="@{/download-file(filePath=${item.path})}">
                     <span th:text="${#strings.substring(item.path, item.path.lastIndexOf('/') + 1)}"></span>
                 </a>
