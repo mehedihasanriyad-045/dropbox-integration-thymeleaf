@@ -27,24 +27,37 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: space-between;
             padding: 15px;
             border: 1px solid #ddd;
             border-radius: 4px;
             transition: background-color 0.3s;
             cursor: pointer;
             text-align: center;
+            height: 150px; /* Adjust this value as needed */
         }
 
         .file-list-item:hover {
             background-color: #f8f9fa;
         }
 
+        .file-icon {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
         .file-list-item i {
             margin-bottom: 10px;
         }
 
-        .file-list-item span {
-            word-break: break-word;
+        .file-name {
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
             font-size: 14px;
         }
 
@@ -52,24 +65,24 @@
             color: #4CAF50;
         }
 
-        .file-icon {
+        .file-icon i {
             color: #2196F3;
         }
 
         /* Icon size classes */
-        .icon-size-small .file-list-item i {
+        .icon-size-small .file-icon i {
             font-size: 24px;
         }
 
-        .icon-size-medium .file-list-item i {
+        .icon-size-medium .file-icon i {
             font-size: 32px;
         }
 
-        .icon-size-large .file-list-item i {
+        .icon-size-large .file-icon i {
             font-size: 48px;
         }
 
-        .icon-size-xlarge .file-list-item i {
+        .icon-size-xlarge .file-icon i {
             font-size: 64px;
         }
 
@@ -81,7 +94,15 @@
         .icon-size-buttons .btn {
             margin-right: 10px;
         }
+
+        /* New styles for images */
+        .file-icon img {
+            max-width: 100%;
+            max-height: 80px; /* Adjust as needed */
+            object-fit: contain;
+        }
     </style>
+
 </head>
 <body>
 <div class="file-manager-container">
@@ -126,47 +147,29 @@
     </div>
 
 
-    <div class="file-list" th:classappend="'icon-size-' + ${iconSize}" id="fileList">
+    <div class="file-list" id="fileList">
         <div th:each="item : ${filesAndFolders}" class="file-list-item">
-
-            <!-- Folder Icon and Link -->
-            <div th:if="${item.type == 'folder'}" class="folder-item">
-                <i class="fas fa-folder folder-icon"></i><br>
-                <a th:href="@{/files(path=${item.path}, size=${iconSize})}">
+            <div th:if="${item.type == 'folder'}" class="file-icon">
+                <i class="fas fa-folder folder-icon"></i>
+            </div>
+            <div th:if="${item.type == 'file'}" class="file-icon">
+                <img th:if="${@fileController.getSpecificFileType(item.path) == 'img'}"
+                     th:src="@{/view-image(filePath=${item.path})}"
+                     alt="Image"
+                     th:attr="onclick=|showImageModal('@{/view-image(filePath=${item.path})}')|">
+                <i th:if="${@fileController.getSpecificFileType(item.path) != 'img'}"
+                   th:classappend="${@fileController.getFileIcon(item.path)}"></i>
+            </div>
+            <div class="file-name">
+                <a th:if="${item.type == 'folder'}" th:href="@{/files(path=${item.path}, size=${iconSize})}">
                     <span th:text="${#strings.substring(item.path, item.path.lastIndexOf('/') + 1)}"></span>
                 </a>
-            </div>
-
-            <!-- File Icon and Download or Preview Link -->
-            <div th:if="${item.type == 'file'}" class="file-item">
-
-                <div th:if="${@fileController.getSpecificFileType(item.path) == 'img'}">
-                    <img th:src="@{/view-image(filePath=${item.path})}"
-                         alt="Image"
-                         class="img-thumbnail"
-                         style="max-width: 100px; cursor: pointer;"
-                         th:attr="onclick=|showImageModal('@{/view-image(filePath=${item.path})}')|"> <br>
-
+                <a th:if="${item.type == 'file' and @fileController.getSpecificFileType(item.path) != 'img'}"
+                   th:href="@{/download-file(filePath=${item.path})}">
                     <span th:text="${#strings.substring(item.path, item.path.lastIndexOf('/') + 1)}"></span>
-
-                </div>
-
-
-
-
-                <div th:if="${@fileController.getSpecificFileType(item.path) != 'img'}">
-                    <i th:classappend="${@fileController.getFileIcon(item.path)}"></i> <br>
-
-                    <a th:href="@{/download-file(filePath=${item.path})}">
-                        <span th:text="${#strings.substring(item.path, item.path.lastIndexOf('/') + 1)}"></span>
-                    </a>
-                </div>
-
-
-                <!-- Direct download for non-image files -->
-<!--                <a th:href="@{/download-file(filePath=${item.path})}">-->
-<!--                    <span th:text="${#strings.substring(item.path, item.path.lastIndexOf('/') + 1)}"></span>-->
-<!--                </a>-->
+                </a>
+                <span th:if="${item.type == 'file' and @fileController.getSpecificFileType(item.path) == 'img'}"
+                      th:text="${#strings.substring(item.path, item.path.lastIndexOf('/') + 1)}"></span>
             </div>
         </div>
     </div>
