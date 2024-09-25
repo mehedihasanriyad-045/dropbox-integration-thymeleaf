@@ -8,12 +8,14 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +41,12 @@ public class DropboxFileController {
             List<FileFolderItem> fileFolderItems = new ArrayList<>();
             for (Metadata metadata : filesAndFolders) {
                 String type = (metadata instanceof FileMetadata) ? "file" : "folder";
-                fileFolderItems.add(new FileFolderItem(metadata.getPathLower(), type));
+                if(type.equals("file")){
+                    FileMetadata fileMetadata = (FileMetadata) metadata;
+                    fileFolderItems.add(new FileFolderItem(fileMetadata.getId(), metadata.getPathLower(), type));
+                }else {
+                    fileFolderItems.add(new FileFolderItem(metadata.getPathLower(), type));
+                }
             }
 
             model.addAttribute("filesAndFolders", fileFolderItems);
@@ -122,6 +129,37 @@ public class DropboxFileController {
         }
     }
 
+    @GetMapping("/view-image")
+    public ResponseEntity<byte[]> viewImage(@RequestParam("filePath") String filePath, HttpSession session) {
+        try {
+            String accessToken = (String) session.getAttribute("accessToken");
+            String refreshToken = (String) session.getAttribute("refreshToken");
+
+            // Get file stream from Dropbox service
+            InputStream fileStream = dropboxService.downloadFile(accessToken, refreshToken, filePath);
+
+            // Convert InputStream to byte array
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            int nRead;
+            byte[] data = new byte[16384];
+
+            while ((nRead = fileStream.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, nRead);
+            }
+
+            byte[] imageBytes = buffer.toByteArray();
+
+            // Set headers
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.IMAGE_JPEG); // Adjust this based on your image type
+
+            return new ResponseEntity<>(imageBytes, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace(); // Log the exception
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     public String getFileIcon(String filePath) {
         if (filePath.endsWith(".pdf")) {
             return "fas fa-file-pdf pdf-icon";
@@ -137,6 +175,24 @@ public class DropboxFileController {
             return "fas fa-file-excel excel-icon";
         } else {
             return "fas fa-file-alt file-icon"; // Default icon for other file types
+        }
+    }
+
+    public String getSpecificFileType(String filePath) {
+        if (filePath.endsWith(".pdf")) {
+            return "pdf";
+        } else if (filePath.endsWith(".jpg") || filePath.endsWith(".jpeg") || filePath.endsWith(".png") || filePath.endsWith(".gif")) {
+            return "img";
+        } else if (filePath.endsWith(".mp4") || filePath.endsWith(".mkv") || filePath.endsWith(".avi")) {
+            return "video";
+        } else if (filePath.endsWith(".mp3") || filePath.endsWith(".wav")) {
+            return "audio";
+        } else if (filePath.endsWith(".doc") || filePath.endsWith(".docx")) {
+            return "doc";
+        } else if (filePath.endsWith(".xls") || filePath.endsWith(".xlsx")) {
+            return "excel";
+        } else {
+            return "unknown";
         }
     }
 
