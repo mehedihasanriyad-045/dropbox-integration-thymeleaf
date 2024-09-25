@@ -1,6 +1,8 @@
 package com.iis.dropboxthymelife.service;
 
 import com.dropbox.core.*;
+import com.dropbox.core.oauth.DbxCredential;
+import com.dropbox.core.oauth.DbxRefreshResult;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.DownloadErrorException;
 import com.dropbox.core.v2.files.FileMetadata;
@@ -176,8 +178,9 @@ public class DropboxService {
 
     }
 
-    public DbxAuthFinish refreshAccessToken(String refreshToken) throws Exception {
-        return DropboxHelper.refreshAccessToken(refreshToken);
+    public DbxRefreshResult refreshAccessToken(String accessToken, String refreshToken) throws Exception {
+        DbxRequestConfig config = DbxRequestConfig.newBuilder("dropbox/springboot-app").build();
+        return DropboxHelper.getAccessTokenFromRefreshToken(accessToken, refreshToken, appKey, appSecret, config);
     }
 
     public User getStoredCredentials(){

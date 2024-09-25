@@ -10,6 +10,5 @@ public class DropboxConfig implements WebMvcConfigurer {
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
         registry.addViewController("/").setViewName("home");
-        registry.addViewController("/dashboard").setViewName("dashboard");
     }
 }

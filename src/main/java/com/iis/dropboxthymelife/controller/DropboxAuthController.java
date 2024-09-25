@@ -2,6 +2,8 @@ package com.iis.dropboxthymelife.controller;
 
 import com.dropbox.core.DbxAuthFinish;
 import com.dropbox.core.DbxException;
+import com.dropbox.core.oauth.DbxCredential;
+import com.dropbox.core.oauth.DbxRefreshResult;
 import com.iis.dropboxthymelife.entity.User;
 import com.iis.dropboxthymelife.service.DropboxService;
 import jakarta.servlet.http.HttpSession;
@@ -27,17 +29,15 @@ public class DropboxAuthController {
 
         if (accessToken != null && refreshToken != null && expiresAt != null) {
             if (System.currentTimeMillis() < expiresAt) {
-                // Access token is valid
-                return "dashboard";
+                return "redirect:/files";
             } else {
-                // Access token is expired, refresh the token
                 try {
-                    DbxAuthFinish refreshedCredential = dropboxService.refreshAccessToken(refreshToken);
+                    DbxRefreshResult refreshedCredential = dropboxService.refreshAccessToken(accessToken, refreshToken);
                     session.setAttribute("accessToken", refreshedCredential.getAccessToken());
-                    session.setAttribute("refreshToken", refreshedCredential.getRefreshToken());
+                    session.setAttribute("refreshToken", refreshToken);
                     session.setAttribute("expiresAt", refreshedCredential.getExpiresAt());
                     model.addAttribute("accessToken", refreshedCredential.getAccessToken());
-                    return "dashboard";
+                    return "redirect:/files";
                 } catch (DbxException e) {
                     model.addAttribute("error", "Failed to refresh Dropbox token");
                     return "home";
@@ -46,22 +46,22 @@ public class DropboxAuthController {
                 }
             }
         } else {
-            User storedCredential = dropboxService.getStoredCredentials(); // Implement this method
+            User storedCredential = dropboxService.getStoredCredentials();
             if (storedCredential != null) {
                 if (System.currentTimeMillis() < storedCredential.getExpiresAt()) {
                     session.setAttribute("accessToken", storedCredential.getAccessToken());
                     session.setAttribute("refreshToken", storedCredential.getRefreshToken());
                     session.setAttribute("expiresAt", storedCredential.getExpiresAt());
                     model.addAttribute("accessToken", storedCredential.getAccessToken());
-                    return "dashboard";
+                    return "redirect:/files";
                 } else {
                     try {
-                        DbxAuthFinish refreshedCredential = dropboxService.refreshAccessToken(storedCredential.getRefreshToken());
+                        DbxRefreshResult refreshedCredential = dropboxService.refreshAccessToken(storedCredential.getAccessToken(), storedCredential.getRefreshToken());
                         session.setAttribute("accessToken", refreshedCredential.getAccessToken());
-                        session.setAttribute("refreshToken", refreshedCredential.getRefreshToken());
+                        session.setAttribute("refreshToken", storedCredential.getRefreshToken());
                         session.setAttribute("expiresAt", refreshedCredential.getExpiresAt());
                         model.addAttribute("accessToken", refreshedCredential.getAccessToken());
-                        return "dashboard";
+                        return "redirect:/files";
                     } catch (DbxException e) {
                         model.addAttribute("error", "Failed to refresh Dropbox token");
                         return "home";
@@ -98,11 +98,19 @@ public class DropboxAuthController {
         } else {
             model.addAttribute("error", "Failed to get Dropbox credentials");
         }
-        return "dashboard";
+        return "redirect:/files";
     }
 
-    @GetMapping("/dashboard")
-    public String dashboard() {
-        return "dashboard";
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.removeAttribute("accessToken");
+        session.removeAttribute("refreshToken");
+        session.removeAttribute("expiresAt");
+        return "redirect:/login";
     }
 }
