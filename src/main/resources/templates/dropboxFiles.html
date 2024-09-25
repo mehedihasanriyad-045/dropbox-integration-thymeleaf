@@ -6,7 +6,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
-        /* Your existing styles */
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
@@ -19,8 +18,8 @@
 
         .file-list {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             gap: 15px;
+            transition: all 0.3s;
         }
 
         .file-list-item {
@@ -28,13 +27,13 @@
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
-            padding: 15px;
+            padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            transition: background-color 0.3s;
+            transition: all 0.3s;
             cursor: pointer;
             text-align: center;
-            height: 150px; /* Adjust this value as needed */
+            overflow: hidden;
         }
 
         .file-list-item:hover {
@@ -47,18 +46,15 @@
             align-items: center;
             justify-content: center;
             width: 100%;
-        }
-
-        .file-list-item i {
-            margin-bottom: 10px;
+            overflow: hidden;
         }
 
         .file-name {
             width: 100%;
             overflow: hidden;
             text-overflow: ellipsis;
-            white-space: nowrap;
-            font-size: 14px;
+            white-space: normal; /* Allow text to wrap */
+            text-align: center; /* Center the text */
         }
 
         .folder-icon {
@@ -69,24 +65,6 @@
             color: #2196F3;
         }
 
-        /* Icon size classes */
-        .icon-size-small .file-icon i {
-            font-size: 24px;
-        }
-
-        .icon-size-medium .file-icon i {
-            font-size: 32px;
-        }
-
-        .icon-size-large .file-icon i {
-            font-size: 48px;
-        }
-
-        .icon-size-xlarge .file-icon i {
-            font-size: 64px;
-        }
-
-        /* Button container for changing icon size */
         .icon-size-buttons {
             margin-bottom: 20px;
         }
@@ -95,14 +73,70 @@
             margin-right: 10px;
         }
 
-        /* New styles for images */
         .file-icon img {
             max-width: 100%;
-            max-height: 80px; /* Adjust as needed */
+            max-height: 100%;
             object-fit: contain;
         }
-    </style>
 
+        /* Grid size classes */
+        .grid-small {
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        }
+
+        .grid-medium {
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        }
+
+        .grid-large {
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        }
+
+        .grid-xlarge {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        }
+
+        /* Size classes for the grid items */
+        .size-small {
+            height: 80px;
+            font-size: 10px;
+        }
+
+        .size-medium {
+            height: 120px;
+            font-size: 14px;
+        }
+
+        .size-large {
+            height: 160px;
+            font-size: 16px;
+        }
+
+        .size-xlarge {
+            height: 200px;
+            font-size: 18px;
+        }
+
+        .size-small .file-icon i, .size-small .file-icon img {
+            font-size: 24px;
+            max-height: 50px;
+        }
+
+        .size-medium .file-icon i, .size-medium .file-icon img {
+            font-size: 36px;
+            max-height: 80px;
+        }
+
+        .size-large .file-icon i, .size-large .file-icon img {
+            font-size: 48px;
+            max-height: 110px;
+        }
+
+        .size-xlarge .file-icon i, .size-xlarge .file-icon img {
+            font-size: 60px;
+            max-height: 140px;
+        }
+    </style>
 </head>
 <body>
 <div class="file-manager-container">
@@ -119,36 +153,33 @@
 
     <br>
 
-    <!-- Buttons for icon size selection -->
-
     <div class="container">
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 mt-3 justify-content-start">
             <div class="col mb-3">
-                <button class="btn btn-outline-secondary btn-sm w-100" onclick="changeIconSize('small')">
+                <button class="btn btn-outline-secondary btn-sm w-100" onclick="changeGridSize('small')">
                     <i class="fas fa-th"></i> Small Icons
                 </button>
             </div>
             <div class="col mb-3">
-                <button class="btn btn-outline-secondary btn-sm w-100" onclick="changeIconSize('medium')">
+                <button class="btn btn-outline-secondary btn-sm w-100" onclick="changeGridSize('medium')">
                     <i class="fas fa-th-large"></i> Medium Icons
                 </button>
             </div>
             <div class="col mb-3">
-                <button class="btn btn-outline-secondary btn-sm w-100" onclick="changeIconSize('large')">
+                <button class="btn btn-outline-secondary btn-sm w-100" onclick="changeGridSize('large')">
                     <i class="fas fa-border-all"></i> Large Icons
                 </button>
             </div>
             <div class="col mb-3">
-                <button class="btn btn-outline-secondary btn-sm w-100" onclick="changeIconSize('xlarge')">
+                <button class="btn btn-outline-secondary btn-sm w-100" onclick="changeGridSize('xlarge')">
                     <i class="fas fa-square"></i> Extra Large Icons
                 </button>
             </div>
         </div>
     </div>
 
-
-    <div class="file-list" id="fileList">
-        <div th:each="item : ${filesAndFolders}" class="file-list-item">
+    <div class="file-list grid-medium" id="fileList">
+        <div th:each="item : ${filesAndFolders}" class="file-list-item size-medium">
             <div th:if="${item.type == 'folder'}" class="file-icon">
                 <i class="fas fa-folder folder-icon"></i>
             </div>
@@ -184,38 +215,38 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <img id="imageModalSrc" src="" alt="Image Preview">
+                <img id="imageModalSrc" src="" alt="Image Preview" style="max-width: 100%; height: auto;">
             </div>
         </div>
     </div>
 </div>
 
-
 <!-- Bootstrap JS and dependencies -->
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
 
-
-<!-- JavaScript for changing icon size -->
 <script>
-    function changeIconSize(size) {
+    function changeGridSize(size) {
         var fileList = document.getElementById('fileList');
-        fileList.className = 'file-list icon-size-' + size;
+        var fileItems = document.querySelectorAll('.file-list-item');
 
-        // Update all links to include the size in the URL
-        let links = document.querySelectorAll('a');
-        links.forEach(link => {
-            let url = new URL(link.href);
-            url.searchParams.set('size', size);
-            link.href = url.href;
+        // Remove all grid classes
+        fileList.classList.remove('grid-small', 'grid-medium', 'grid-large', 'grid-xlarge');
+        // Add the corresponding grid class
+        fileList.classList.add('grid-' + size);
+
+        // Update each file item
+        fileItems.forEach(function(item) {
+            // Remove all size classes
+            item.classList.remove('size-small', 'size-medium', 'size-large', 'size-xlarge');
+            // Add the corresponding size class
+            item.classList.add('size-' + size);
         });
     }
 
     function showImageModal(imageUrl) {
-        // Set the image source in the modal
         document.getElementById('imageModalSrc').src = imageUrl;
 
-        // Show the modal using Bootstrap's modal function
         var imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
         imageModal.show();
     }
