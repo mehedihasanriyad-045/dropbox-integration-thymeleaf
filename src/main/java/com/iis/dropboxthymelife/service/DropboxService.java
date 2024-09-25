@@ -6,16 +6,24 @@ import com.dropbox.core.v2.files.DownloadErrorException;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
+import com.dropbox.core.v2.users.FullAccount;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.iis.dropboxthymelife.entity.User;
+import com.iis.dropboxthymelife.helper.DropboxHelper;
+import com.iis.dropboxthymelife.repository.UserRepository;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpRequest;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class DropboxService {
@@ -30,6 +38,9 @@ public class DropboxService {
     private String redirectUri;
 
     private static final String SESSION_KEY = "dropbox-auth-csrf-token";
+
+    @Autowired
+    UserRepository userRepository;
 
     public String getAuthorizationUrl(HttpSession session) {
         DbxRequestConfig config = DbxRequestConfig.newBuilder("dropbox/java-tutorial").build();
@@ -125,14 +136,11 @@ public class DropboxService {
     public String readFileContent(String accessToken, String refreshToken, String filePath) throws Exception {
         DbxClientV2 client = getClient(accessToken);
 
-        // Create output stream to store file data
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         try {
-            // Download file content
             client.files().download(filePath).download(outputStream);
 
-            // Convert the byte array to a string (assuming it's a text file)
             return new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
 
         } catch (DownloadErrorException e) {
@@ -152,4 +160,32 @@ public class DropboxService {
         }
     }
 
+    public void storeCredentials(DbxAuthFinish credential) throws DbxException {
+
+        DbxClientV2 client = getClient(credential.getAccessToken());
+        FullAccount account = client.users().getCurrentAccount();
+
+        User user = User.builder()
+                .name(account.getName().getDisplayName())
+                .email(account.getEmail())
+                .accessToken(credential.getAccessToken())
+                .refreshToken(credential.getRefreshToken())
+                .build();
+
+        userRepository.save(user);
+
+    }
+
+    public DbxAuthFinish refreshAccessToken(String refreshToken) throws Exception {
+        return DropboxHelper.refreshAccessToken(refreshToken);
+    }
+
+    public User getStoredCredentials(){
+        try {
+            Optional<User> user = userRepository.findById(1L);
+            return user.orElse(null);
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }
