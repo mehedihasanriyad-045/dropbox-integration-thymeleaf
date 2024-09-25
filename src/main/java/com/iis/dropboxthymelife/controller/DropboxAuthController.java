@@ -2,7 +2,7 @@ package com.iis.dropboxthymelife.controller;
 
 import com.dropbox.core.DbxAuthFinish;
 import com.dropbox.core.DbxException;
-import com.iis.dropboxthymelife.entity.User;
+import com.iis.dropboxthymelife.entity.AppUser;
 import com.iis.dropboxthymelife.service.DropboxService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +46,7 @@ public class DropboxAuthController {
                 }
             }
         } else {
-            User storedCredential = dropboxService.getStoredCredentials(); // Implement this method
+            AppUser storedCredential = dropboxService.getStoredCredentials(); // Implement this method
             if (storedCredential != null) {
                 if (System.currentTimeMillis() < storedCredential.getExpiresAt()) {
                     session.setAttribute("accessToken", storedCredential.getAccessToken());

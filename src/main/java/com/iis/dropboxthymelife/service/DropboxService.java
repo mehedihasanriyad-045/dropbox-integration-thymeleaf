@@ -7,21 +7,16 @@ import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.users.FullAccount;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.iis.dropboxthymelife.entity.User;
+import com.iis.dropboxthymelife.entity.AppUser;
 import com.iis.dropboxthymelife.helper.DropboxHelper;
 import com.iis.dropboxthymelife.repository.UserRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpRequest;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -165,14 +160,14 @@ public class DropboxService {
         DbxClientV2 client = getClient(credential.getAccessToken());
         FullAccount account = client.users().getCurrentAccount();
 
-        User user = User.builder()
+        AppUser appUser = AppUser.builder()
                 .name(account.getName().getDisplayName())
                 .email(account.getEmail())
                 .accessToken(credential.getAccessToken())
                 .refreshToken(credential.getRefreshToken())
                 .build();
 
-        userRepository.save(user);
+        userRepository.save(appUser);
 
     }
 
@@ -180,9 +175,9 @@ public class DropboxService {
         return DropboxHelper.refreshAccessToken(refreshToken);
     }
 
-    public User getStoredCredentials(){
+    public AppUser getStoredCredentials(){
         try {
-            Optional<User> user = userRepository.findById(1L);
+            Optional<AppUser> user = userRepository.findById(1L);
             return user.orElse(null);
         } catch (Exception e) {
             return null;
