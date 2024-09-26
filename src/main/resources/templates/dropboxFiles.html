@@ -192,18 +192,29 @@
                    th:classappend="${@fileController.getFileIcon(item.path)}"></i>
             </div>
             <div class="file-name">
+                <!-- Folder -->
                 <a th:if="${item.type == 'folder'}" th:href="@{/files(path=${item.path}, size=${iconSize})}">
                     <span th:text="${#strings.substring(item.path, item.path.lastIndexOf('/') + 1)}"></span>
                 </a>
-                <a th:if="${item.type == 'file' and @fileController.getSpecificFileType(item.path) != 'img'}"
+                <!-- Non-image File -->
+                <a th:if="${item.type == 'file' and @fileController.getSpecificFileType(item.path) != 'img'
+                            and @fileController.getSpecificFileType(item.path) != 'pdf'}"
                    th:href="@{/download-file(filePath=${item.path})}">
                     <span th:text="${#strings.substring(item.path, item.path.lastIndexOf('/') + 1)}"></span>
                 </a>
+                <!-- PDF File (Opens in New Tab) -->
+                <a th:if="${item.type == 'file' and @fileController.getSpecificFileType(item.path) == 'pdf'}"
+                   th:href="@{/view-pdf(filePath=${item.path})}"
+                   target="_blank">
+                    <span th:text="${#strings.substring(item.path, item.path.lastIndexOf('/') + 1)}"></span>
+                </a>
+                <!-- Image File -->
                 <span th:if="${item.type == 'file' and @fileController.getSpecificFileType(item.path) == 'img'}"
                       th:text="${#strings.substring(item.path, item.path.lastIndexOf('/') + 1)}"></span>
             </div>
         </div>
     </div>
+
 
 </div>
 

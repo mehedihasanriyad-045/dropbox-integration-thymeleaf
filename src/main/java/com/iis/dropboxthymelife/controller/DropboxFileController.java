@@ -7,16 +7,17 @@ import com.iis.dropboxthymelife.service.DropboxService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -159,6 +160,40 @@ public class DropboxFileController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    @GetMapping("/view-pdf")
+    public ResponseEntity<byte[]> viewPdf(@RequestParam("filePath") String filePath, HttpSession session) {
+        try {
+            String accessToken = (String) session.getAttribute("accessToken");
+            String refreshToken = (String) session.getAttribute("refreshToken");
+
+            // Get file stream from Dropbox service
+            InputStream fileStream = dropboxService.downloadFile(accessToken, refreshToken, filePath);
+
+            // Convert InputStream to byte array
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            int nRead;
+            byte[] data = new byte[16384];  // Buffer size can be adjusted if needed
+
+            while ((nRead = fileStream.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, nRead);
+            }
+
+            byte[] pdfBytes = buffer.toByteArray();
+
+            // Set headers to display the PDF in the browser tab
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);  // Set the content type to PDF
+            headers.setContentDisposition(ContentDisposition.inline().filename(filePath).build());  // Ensure inline display
+
+            return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();  // Log any exceptions
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+
 
     public String getFileIcon(String filePath) {
         if (filePath.endsWith(".pdf")) {
